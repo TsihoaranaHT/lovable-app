@@ -1,0 +1,8 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(npm run build:*)",
+      "Bash(dir /b \"C:\\\\Users\\\\USER\\\\Documents\\\\VSCode\\\\lovable-app-nextjs\\\\components\")"
+    ]
+  }
+}
