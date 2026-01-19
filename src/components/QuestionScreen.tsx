@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { ArrowLeft, ArrowRight, Info, Check, Package, Users, Sparkles } from "lucide-react";
+import { ArrowLeft, ArrowRight, Info, Check, Package, Users } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Question } from "@/data/questions";
 
@@ -15,7 +15,6 @@ interface QuestionScreenProps {
   onBack: () => void;
   isFirst: boolean;
   isLast: boolean;
-  matchingProductCount: number;
 }
 
 const QuestionScreen = ({
@@ -30,13 +29,12 @@ const QuestionScreen = ({
   onBack,
   isFirst,
   isLast,
-  matchingProductCount,
 }: QuestionScreenProps) => {
   const [showJustification, setShowJustification] = useState(false);
 
   const showOtherOption = question.id === 3;
   const isOtherSelected = selectedAnswers.includes("other");
-  const hasSelection = selectedAnswers.length > 0 && (!isOtherSelected || otherText.trim().length > 0);
+  const hasSelection = selectedAnswers.length > 0;
 
   const handleAnswerClick = (answerId: string) => {
     // For single select, auto-advance after selection - except for "other" which needs text input
@@ -73,17 +71,6 @@ const QuestionScreen = ({
               {showJustification ? "Masquer l'explication" : "Pourquoi cette question ?"}
             </button>
 
-            {/* Quick need banner - only on question 1 */}
-            {question.id === 1 && (
-              <button
-                onClick={() => handleAnswerClick("1-quick")}
-                className="w-full max-w-md mx-auto flex items-center justify-center gap-2 rounded-full border-2 border-accent bg-accent/10 px-5 py-2.5 text-sm font-medium text-accent hover:bg-accent/20 transition-all group"
-              >
-                <Sparkles className="h-4 w-4" />
-                Je sais exactement ce qu'il me faut
-                <ArrowRight className="h-4 w-4 opacity-60 group-hover:opacity-100 group-hover:translate-x-0.5 transition-all" />
-              </button>
-            )}
             
             {showJustification && (
               <div className="rounded-lg bg-primary/5 border border-primary/20 p-4 text-sm text-muted-foreground text-left">
@@ -135,14 +122,9 @@ const QuestionScreen = ({
                       
                       {/* Answer text */}
                       <div className="flex-1">
-                        <span className="text-sm sm:text-base font-medium text-foreground">
+                        <span className="text-sm sm:text-base text-foreground">
                           {answer.mainText}
                         </span>
-                        {answer.secondaryText && (
-                          <span className="ml-1.5 sm:ml-2 text-xs sm:text-sm text-muted-foreground">
-                            — {answer.secondaryText}
-                          </span>
-                        )}
                       </div>
                     </div>
                   </button>
@@ -248,14 +230,17 @@ const QuestionScreen = ({
             </div>
             
             {/* Desktop reassurance - below buttons */}
-            <div className="flex items-center justify-center gap-6 text-sm">
-              <div className="inline-flex items-center gap-2 text-primary">
-                <Package className="h-4 w-4" />
-                <span className="font-medium">{matchingProductCount} produits correspondent</span>
+            <div className="flex items-center justify-center gap-4 text-sm">
+              <div className="inline-flex items-center gap-2 rounded-full bg-primary/10 px-3 py-1.5">
+                <Package className="h-4 w-4 text-primary" />
+                <span className="text-foreground">
+                  <span className="font-semibold text-primary">Ponts élévateurs</span>
+                  <span className="text-muted-foreground"> : 347 produits analysés • 24 fournisseurs</span>
+                </span>
               </div>
               <div className="inline-flex items-center gap-2 text-muted-foreground">
                 <Users className="h-4 w-4" />
-                <span>+ de 2 500 pros équipés ce mois-ci</span>
+                <span>+ de 10 000 pros équipés / mois</span>
               </div>
             </div>
           </div>
@@ -265,14 +250,15 @@ const QuestionScreen = ({
       {/* Mobile sticky footer with reassurance */}
       <div className="sm:hidden fixed bottom-0 left-0 right-0 bg-background border-t border-border shadow-[0_-4px_20px_rgba(0,0,0,0.1)]">
         {/* Reassurance line */}
-        <div className="flex items-center justify-center gap-4 px-4 py-2 border-b border-border/50 bg-primary/5">
-          <div className="inline-flex items-center gap-1.5 text-xs text-primary font-medium">
-            <Package className="h-3.5 w-3.5" />
-            <span>{matchingProductCount} produits</span>
+        <div className="flex flex-col items-center gap-1.5 px-4 py-2 border-b border-border/50 bg-primary/5">
+          <div className="inline-flex items-center gap-1.5 text-xs">
+            <Package className="h-3.5 w-3.5 text-primary" />
+            <span className="font-semibold text-primary">Ponts élévateurs</span>
+            <span className="text-muted-foreground">: 347 produits analysés • 24 fournisseurs</span>
           </div>
           <div className="inline-flex items-center gap-1.5 text-xs text-muted-foreground">
             <Users className="h-3.5 w-3.5" />
-            <span>2 500+ pros équipés</span>
+            <span>+ de 10 000 pros équipés / mois</span>
           </div>
         </div>
         

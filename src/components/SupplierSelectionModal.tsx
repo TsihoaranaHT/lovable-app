@@ -1,6 +1,7 @@
 import { useState, useMemo, useEffect } from "react";
-import { ChevronDown, ChevronUp, RotateCcw, ArrowLeft, Send, Search, LayoutGrid, List } from "lucide-react";
+import { ChevronDown, ChevronUp, RotateCcw, ArrowLeft, Send, Search, LayoutGrid, List, ThumbsUp, ThumbsDown } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { toast } from "@/hooks/use-toast";
 import ProgressHeader from "./ProgressHeader";
 import CriteriaTags from "./CriteriaTags";
 import SupplierCard from "./SupplierCard";
@@ -46,6 +47,11 @@ interface MediaItem {
   thumbnail?: string;
 }
 
+interface PriceInfo {
+  amount?: number;
+  isStartingFrom?: boolean;
+}
+
 interface Supplier {
   id: string;
   productName: string;
@@ -63,6 +69,7 @@ interface Supplier {
   descriptionHtml?: string;
   specs: ProductSpec[];
   supplier: SupplierInfo;
+  price?: PriceInfo;
 }
 
 type ViewState = "selection" | "contact" | "modify-criteria" | "custom-need";
@@ -142,6 +149,7 @@ const RECOMMENDED_SUPPLIERS: Supplier[] = [
       responseTime: "< 2h",
       logo: logoProvac,
     },
+    price: { amount: 4500 },
   },
   {
     id: "2",
@@ -170,6 +178,7 @@ const RECOMMENDED_SUPPLIERS: Supplier[] = [
       responseTime: "< 4h",
       logo: logoNussbaum,
     },
+    price: { amount: 3800 },
   },
   {
     id: "3",
@@ -199,6 +208,7 @@ const RECOMMENDED_SUPPLIERS: Supplier[] = [
       responseTime: "< 6h",
       logo: logoRavaglioli,
     },
+    price: { amount: 4200, isStartingFrom: true },
   },
   {
     id: "4",
@@ -460,7 +470,7 @@ const SupplierSelectionModal = ({ userAnswers, onBackToQuestionnaire }: Supplier
   const [showComparison, setShowComparison] = useState(false);
   const [criteriaModified, setCriteriaModified] = useState(false);
   const [showCriteriaChangedBanner, setShowCriteriaChangedBanner] = useState(false);
-  const [mobileViewMode, setMobileViewMode] = useState<"grid" | "list">("grid");
+  const [mobileViewMode, setMobileViewMode] = useState<"grid" | "list">("list");
 
   // Séparer les produits en fonction de leur sélection
   const selectedSuppliersList = useMemo(() => {
@@ -577,36 +587,7 @@ const SupplierSelectionModal = ({ userAnswers, onBackToQuestionnaire }: Supplier
                   {selectedCount} fournisseur{selectedCount > 1 ? "s" : ""}{" "}
                   recommandé{selectedCount > 1 ? "s" : ""} pour vous
                 </p>
-                
-                {/* Mobile View Toggle */}
-                <div className="sm:hidden flex justify-center gap-1 mt-4">
-                  <button
-                    onClick={() => setMobileViewMode("grid")}
-                    className={cn(
-                      "flex items-center gap-1.5 px-3 py-2 rounded-l-lg border text-sm font-medium transition-all",
-                      mobileViewMode === "grid"
-                        ? "bg-primary text-primary-foreground border-primary"
-                        : "bg-background text-muted-foreground border-border hover:bg-muted"
-                    )}
-                  >
-                    <LayoutGrid className="h-4 w-4" />
-                    Grille
-                  </button>
-                  <button
-                    onClick={() => setMobileViewMode("list")}
-                    className={cn(
-                      "flex items-center gap-1.5 px-3 py-2 rounded-r-lg border text-sm font-medium transition-all",
-                      mobileViewMode === "list"
-                        ? "bg-primary text-primary-foreground border-primary"
-                        : "bg-background text-muted-foreground border-border hover:bg-muted"
-                    )}
-                  >
-                    <List className="h-4 w-4" />
-                    Liste
-                  </button>
-                </div>
               </div>
-
               {/* Criteria Tags */}
               <CriteriaTags
                 criteria={CRITERIA}
@@ -638,9 +619,7 @@ const SupplierSelectionModal = ({ userAnswers, onBackToQuestionnaire }: Supplier
                 {!isExpanded && (
                   <div className={cn(
                     "grid gap-4 sm:gap-5",
-                    mobileViewMode === "list" 
-                      ? "grid-cols-1" 
-                      : "grid-cols-2 sm:grid-cols-2 md:grid-cols-2 lg:grid-cols-4"
+                    "grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4"
                   )}>
                     {selectedSuppliersList.map((supplier) => (
                       <SupplierCard
@@ -668,9 +647,7 @@ const SupplierSelectionModal = ({ userAnswers, onBackToQuestionnaire }: Supplier
                       {selectedSuppliersList.length > 0 ? (
                         <div className={cn(
                           "grid gap-4 sm:gap-5",
-                          mobileViewMode === "list" 
-                            ? "grid-cols-1" 
-                            : "grid-cols-2 sm:grid-cols-2 md:grid-cols-2 lg:grid-cols-4"
+                          "grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4"
                         )}>
                           {selectedSuppliersList.map((supplier) => (
                             <SupplierCard
@@ -698,34 +675,11 @@ const SupplierSelectionModal = ({ userAnswers, onBackToQuestionnaire }: Supplier
                         <span className="h-px flex-1 bg-border" />
                       </h3>
                       
-                      {/* Search bar */}
-                      <div className="relative">
-                        <div className="flex items-center gap-3 rounded-xl border-2 border-primary/20 bg-primary/5 px-4 py-3 focus-within:border-primary focus-within:ring-2 focus-within:ring-primary/20 transition-all">
-                          <Search className="h-5 w-5 text-primary" />
-                          <input
-                            type="text"
-                            placeholder="Rechercher parmi les autres résultats..."
-                            value={searchQuery}
-                            onChange={(e) => setSearchQuery(e.target.value)}
-                            className="flex-1 bg-transparent text-sm text-foreground placeholder:text-muted-foreground focus:outline-none"
-                          />
-                          {searchQuery && (
-                            <button
-                              onClick={() => setSearchQuery("")}
-                              className="text-muted-foreground hover:text-foreground transition-colors text-sm"
-                            >
-                              Effacer
-                            </button>
-                          )}
-                        </div>
-                      </div>
 
                       {unselectedSuppliersList.length > 0 ? (
                         <div className={cn(
                           "grid gap-4 sm:gap-5",
-                          mobileViewMode === "list" 
-                            ? "grid-cols-1" 
-                            : "grid-cols-2 sm:grid-cols-2 md:grid-cols-2 lg:grid-cols-4"
+                          "grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4"
                         )}>
                           {unselectedSuppliersList.map((supplier) => (
                             <SupplierCard
@@ -765,7 +719,12 @@ const SupplierSelectionModal = ({ userAnswers, onBackToQuestionnaire }: Supplier
                 {/* Expand/Collapse toggle */}
                 <button
                   onClick={() => setIsExpanded(!isExpanded)}
-                  className="flex w-full items-center justify-center gap-2 py-3 text-sm text-muted-foreground hover:text-foreground transition-colors"
+                  className={cn(
+                    "flex w-full items-center justify-center gap-2 py-3 text-sm transition-colors rounded-lg border",
+                    isExpanded 
+                      ? "text-muted-foreground hover:text-foreground border-transparent" 
+                      : "text-foreground font-medium border-border hover:bg-muted"
+                  )}
                 >
                   {isExpanded ? (
                     <>
@@ -829,7 +788,7 @@ const SupplierSelectionModal = ({ userAnswers, onBackToQuestionnaire }: Supplier
             <div className="order-2 sm:order-1 flex items-center gap-2 sm:gap-3">
               <button
                 onClick={() => setShowComparison(true)}
-                className="flex-1 sm:flex-none rounded-lg border-2 border-primary/30 bg-primary/5 px-4 py-2.5 text-sm font-medium text-primary hover:bg-primary/10 hover:border-primary/50 transition-colors flex items-center justify-center gap-2"
+                className="flex-1 sm:flex-none h-11 rounded-lg border-2 border-muted-foreground/30 bg-muted/50 px-4 text-sm font-medium text-foreground hover:bg-muted hover:border-muted-foreground/50 transition-colors flex items-center justify-center gap-2"
               >
                 <LayoutGrid className="h-4 w-4" />
                 Comparer
@@ -837,16 +796,16 @@ const SupplierSelectionModal = ({ userAnswers, onBackToQuestionnaire }: Supplier
               
               <button
                 onClick={() => setViewState("modify-criteria")}
-                className="flex-1 sm:flex-none rounded-lg border-2 border-primary/30 bg-primary/5 px-4 py-2.5 text-sm font-medium text-primary hover:bg-primary/10 hover:border-primary/50 transition-colors"
+                className="flex-1 sm:flex-none h-11 rounded-lg border-2 border-muted-foreground/30 bg-muted/50 px-4 text-sm font-medium text-foreground hover:bg-muted hover:border-muted-foreground/50 transition-colors flex items-center justify-center"
               >
                 Modifier critères
               </button>
               
               <button
                 onClick={() => setViewState("custom-need")}
-                className="flex-1 sm:flex-none rounded-lg border-2 border-primary/30 bg-primary/5 px-4 py-2.5 text-sm font-medium text-primary hover:bg-primary/10 hover:border-primary/50 transition-colors"
+                className="flex-1 sm:flex-none h-11 rounded-lg border-2 border-muted-foreground/30 bg-muted/50 px-4 text-sm font-medium text-foreground hover:bg-muted hover:border-muted-foreground/50 transition-colors flex items-center justify-center"
               >
-                Besoin différent
+                Pas trouvé ce que vous cherchez ?
               </button>
             </div>
           </div>

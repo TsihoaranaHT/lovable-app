@@ -2,10 +2,12 @@ import { useState } from "react";
 import SupplierSelectionModal from "@/components/SupplierSelectionModal";
 import NeedsQuestionnaire from "@/components/NeedsQuestionnaire";
 import ProfileTypeStep from "@/components/ProfileTypeStep";
-import ExpertHelpBadge from "@/components/ExpertHelpBadge";
 import MatchingLoader from "@/components/MatchingLoader";
+import SearchResultChoice from "@/components/SearchResultChoice";
+import SomethingToAddForm from "@/components/SomethingToAddForm";
+import ContactFormSimple from "@/components/ContactFormSimple";
 
-type FlowStep = "questionnaire" | "profile" | "matching" | "selection";
+type FlowStep = "questionnaire" | "profile" | "matching" | "choice" | "selection" | "something-to-add" | "contact-simple";
 
 interface ProfileData {
   type: "pro_france" | "creation" | "pro_foreign" | "particulier" | null;
@@ -32,14 +34,27 @@ const Index = () => {
   };
 
   const handleMatchingComplete = () => {
+    // After matching, show choice modal
+    setFlowStep("choice");
+  };
+
+  const handleChooseSelection = () => {
     setFlowStep("selection");
+  };
+
+  const handleChooseSomethingToAdd = () => {
+    setFlowStep("something-to-add");
+  };
+
+  const handleSomethingToAddNext = () => {
+    setFlowStep("contact-simple");
   };
 
   return (
     <div className="min-h-screen bg-muted/30">
       {/* Background pattern */}
       <div className="fixed inset-0 bg-[radial-gradient(ellipse_at_top,_var(--tw-gradient-stops))] from-primary/5 via-background to-background" />
-      
+
       {/* Demo content behind modal */}
       <div className="relative z-0 p-8 opacity-50">
         <div className="max-w-4xl mx-auto space-y-6">
@@ -57,7 +72,7 @@ const Index = () => {
       {flowStep === "questionnaire" && (
         <NeedsQuestionnaire onComplete={handleQuestionnaireComplete} />
       )}
-      
+
       {flowStep === "profile" && (
         <ProfileTypeStep
           onComplete={handleProfileComplete}
@@ -66,21 +81,39 @@ const Index = () => {
       )}
 
       {flowStep === "matching" && (
-        <MatchingLoader 
+        <MatchingLoader
           onComplete={handleMatchingComplete}
           duration={5000}
         />
       )}
-      
+
+      {flowStep === "choice" && (
+        <SearchResultChoice
+          onChooseSelection={handleChooseSelection}
+          onChooseSomethingToAdd={handleChooseSomethingToAdd}
+        />
+      )}
+
       {flowStep === "selection" && (
-        <SupplierSelectionModal 
+        <SupplierSelectionModal
           userAnswers={userAnswers}
           onBackToQuestionnaire={() => setFlowStep("profile")}
         />
       )}
 
-      {/* Expert help badge - always visible */}
-      <ExpertHelpBadge />
+      {flowStep === "something-to-add" && (
+        <SomethingToAddForm
+          onNext={handleSomethingToAddNext}
+          onBack={() => setFlowStep("choice")}
+        />
+      )}
+
+      {flowStep === "contact-simple" && (
+        <ContactFormSimple
+          onBack={() => setFlowStep("something-to-add")}
+        />
+      )}
+
     </div>
   );
 };

@@ -69,9 +69,32 @@ const POSTAL_CODE_CITIES = [
 ];
 
 const COUNTRIES = [
-  "Allemagne", "Belgique", "Bulgarie", "Canada", "Chine", "Espagne", "États-Unis",
-  "Italie", "Luxembourg", "Maroc", "Pays-Bas", "Pologne", "Portugal", "Royaume-Uni",
-  "Suisse", "Tunisie"
+  "Afghanistan", "Afrique du Sud", "Albanie", "Algérie", "Allemagne", "Andorre", "Angola", 
+  "Antigua-et-Barbuda", "Arabie saoudite", "Argentine", "Arménie", "Australie", "Autriche", 
+  "Azerbaïdjan", "Bahamas", "Bahreïn", "Bangladesh", "Barbade", "Belgique", "Belize", "Bénin", 
+  "Bhoutan", "Biélorussie", "Birmanie", "Bolivie", "Bosnie-Herzégovine", "Botswana", "Brésil", 
+  "Brunei", "Bulgarie", "Burkina Faso", "Burundi", "Cambodge", "Cameroun", "Canada", "Cap-Vert", 
+  "Centrafrique", "Chili", "Chine", "Chypre", "Colombie", "Comores", "Corée du Nord", "Corée du Sud", 
+  "Costa Rica", "Côte d'Ivoire", "Croatie", "Cuba", "Danemark", "Djibouti", "Dominique", 
+  "Égypte", "Émirats arabes unis", "Équateur", "Érythrée", "Espagne", "Estonie", "Eswatini", 
+  "États-Unis", "Éthiopie", "Fidji", "Finlande", "Gabon", "Gambie", "Géorgie", "Ghana", "Grèce", 
+  "Grenade", "Guatemala", "Guinée", "Guinée équatoriale", "Guinée-Bissau", "Guyana", "Haïti", 
+  "Honduras", "Hongrie", "Inde", "Indonésie", "Irak", "Iran", "Irlande", "Islande", "Israël", 
+  "Italie", "Jamaïque", "Japon", "Jordanie", "Kazakhstan", "Kenya", "Kirghizistan", "Kiribati", 
+  "Koweït", "Laos", "Lesotho", "Lettonie", "Liban", "Liberia", "Libye", "Liechtenstein", 
+  "Lituanie", "Luxembourg", "Macédoine du Nord", "Madagascar", "Malaisie", "Malawi", "Maldives", 
+  "Mali", "Malte", "Maroc", "Maurice", "Mauritanie", "Mexique", "Micronésie", "Moldavie", 
+  "Monaco", "Mongolie", "Monténégro", "Mozambique", "Namibie", "Nauru", "Népal", "Nicaragua", 
+  "Niger", "Nigeria", "Norvège", "Nouvelle-Zélande", "Oman", "Ouganda", "Ouzbékistan", "Pakistan", 
+  "Palaos", "Palestine", "Panama", "Papouasie-Nouvelle-Guinée", "Paraguay", "Pays-Bas", "Pérou", 
+  "Philippines", "Pologne", "Portugal", "Qatar", "République dominicaine", "République tchèque", 
+  "Roumanie", "Royaume-Uni", "Russie", "Rwanda", "Saint-Kitts-et-Nevis", "Saint-Vincent-et-les-Grenadines", 
+  "Sainte-Lucie", "Salomon", "Salvador", "Samoa", "São Tomé-et-Príncipe", "Sénégal", "Serbie", 
+  "Seychelles", "Sierra Leone", "Singapour", "Slovaquie", "Slovénie", "Somalie", "Soudan", 
+  "Soudan du Sud", "Sri Lanka", "Suède", "Suisse", "Suriname", "Syrie", "Tadjikistan", "Tanzanie", 
+  "Tchad", "Thaïlande", "Timor oriental", "Togo", "Tonga", "Trinité-et-Tobago", "Tunisie", 
+  "Turkménistan", "Turquie", "Tuvalu", "Ukraine", "Uruguay", "Vanuatu", "Vatican", "Venezuela", 
+  "Viêt Nam", "Yémen", "Zambie", "Zimbabwe"
 ];
 
 type ProfileType = "pro_france" | "creation" | "pro_foreign" | "particulier" | null;
@@ -113,6 +136,19 @@ const ProfileTypeStep = ({ onComplete, onBack }: ProfileTypeStepProps) => {
   const [showCountryDropdown, setShowCountryDropdown] = useState(false);
   const [countrySearch, setCountrySearch] = useState("");
   const [showPostalCodeSuggestions, setShowPostalCodeSuggestions] = useState(false);
+  const [showManualCompanyForm, setShowManualCompanyForm] = useState(false);
+  const [manualCompanyName, setManualCompanyName] = useState("");
+  const [manualPostalCode, setManualPostalCode] = useState("");
+  const [manualCity, setManualCity] = useState("");
+  const [showManualPostalCodeSuggestions, setShowManualPostalCodeSuggestions] = useState(false);
+
+  // Filter postal code suggestions for manual company form
+  const manualPostalCodeSuggestions = useMemo(() => {
+    if (manualPostalCode.length < 2) return [];
+    return POSTAL_CODE_CITIES.filter((item) =>
+      item.postalCode.startsWith(manualPostalCode)
+    ).slice(0, 8);
+  }, [manualPostalCode]);
 
   // Filter postal code suggestions based on input
   const postalCodeSuggestions = useMemo(() => {
@@ -145,6 +181,9 @@ const ProfileTypeStep = ({ onComplete, onBack }: ProfileTypeStepProps) => {
   const isValid = useMemo(() => {
     switch (selectedType) {
       case "pro_france":
+        if (showManualCompanyForm) {
+          return manualCompanyName.trim().length > 0 && manualPostalCode.trim().length >= 5 && manualCity.trim().length > 0;
+        }
         return selectedCompany !== null;
       case "creation":
         return postalCode.trim().length >= 5 && city.trim().length > 0;
@@ -155,7 +194,7 @@ const ProfileTypeStep = ({ onComplete, onBack }: ProfileTypeStepProps) => {
       default:
         return false;
     }
-  }, [selectedType, selectedCompany, postalCode, city, companyName, country]);
+  }, [selectedType, selectedCompany, postalCode, city, companyName, country, showManualCompanyForm, manualCompanyName, manualPostalCode, manualCity]);
 
   const handleNext = () => {
     if (!isValid) return;
@@ -164,7 +203,13 @@ const ProfileTypeStep = ({ onComplete, onBack }: ProfileTypeStepProps) => {
     
     switch (selectedType) {
       case "pro_france":
-        data.company = selectedCompany!;
+        if (showManualCompanyForm) {
+          data.companyName = manualCompanyName;
+          data.postalCode = manualPostalCode;
+          data.city = manualCity;
+        } else {
+          data.company = selectedCompany!;
+        }
         break;
       case "creation":
       case "particulier":
@@ -231,13 +276,17 @@ const ProfileTypeStep = ({ onComplete, onBack }: ProfileTypeStepProps) => {
                       setSelectedType("pro_france");
                       setSelectedCompany(null);
                       setSearchQuery("");
+                      setShowManualCompanyForm(false);
+                      setManualCompanyName("");
+                      setManualPostalCode("");
+                      setManualCity("");
                     }}
                     className="w-full text-left"
                   >
-                    <div className="flex items-center gap-3">
+                    <div className="flex items-start gap-3">
                       <div
                         className={cn(
-                          "flex h-5 w-5 shrink-0 items-center justify-center rounded-full border-2 transition-colors",
+                          "flex h-5 w-5 shrink-0 items-center justify-center rounded-full border-2 transition-colors mt-0.5",
                           selectedType === "pro_france"
                             ? "border-primary bg-primary"
                             : "border-muted-foreground/30"
@@ -247,16 +296,18 @@ const ProfileTypeStep = ({ onComplete, onBack }: ProfileTypeStepProps) => {
                           <div className="h-2 w-2 rounded-full bg-primary-foreground" />
                         )}
                       </div>
-                      <div className="flex items-center gap-2">
-                        <Building2 className="h-4 w-4 text-primary" />
-                        <span className="font-medium text-primary">Professionnel basé en France</span>
+                      <div className="flex flex-col gap-1">
+                        <div className="flex items-center gap-2">
+                          <Building2 className="h-5 w-5 text-primary shrink-0" />
+                          <span className="font-medium text-primary">Professionnel basé en France</span>
+                        </div>
                         <span className="text-sm text-muted-foreground">(entreprises, associations, collectivités...)</span>
                       </div>
                     </div>
                   </button>
 
                   {selectedType === "pro_france" && (
-                    <div className="mt-4 ml-8 space-y-3">
+                    <div className="mt-4 space-y-3">
                       <label className="text-sm text-muted-foreground">
                         Saisissez le nom de votre structure ou le SIREN
                       </label>
@@ -277,12 +328,15 @@ const ProfileTypeStep = ({ onComplete, onBack }: ProfileTypeStepProps) => {
                       </div>
 
                       {/* Company suggestions */}
-                      {searchQuery.length >= 2 && !selectedCompany && (
+                      {searchQuery.length >= 2 && !selectedCompany && !showManualCompanyForm && (
                         <div className="space-y-2">
                           <p className="text-sm text-center text-muted-foreground">
                             Sélectionnez votre structure si elle s'affiche :
                           </p>
-                          <button className="mx-auto block rounded-lg bg-primary px-4 py-2 text-sm font-medium text-primary-foreground hover:bg-primary/90 transition-colors">
+                          <button 
+                            onClick={() => setShowManualCompanyForm(true)}
+                            className="mx-auto block rounded-lg bg-primary px-4 py-2 text-sm font-medium text-primary-foreground hover:bg-primary/90 transition-colors"
+                          >
                             Ma structure n'est pas dans la liste
                           </button>
                           
@@ -308,6 +362,91 @@ const ProfileTypeStep = ({ onComplete, onBack }: ProfileTypeStepProps) => {
                                 Aucune entreprise trouvée
                               </div>
                             )}
+                          </div>
+                        </div>
+                      )}
+
+                      {/* Manual company form */}
+                      {showManualCompanyForm && (
+                        <div className="space-y-4 p-4 rounded-lg border border-border bg-muted/30">
+                          <div className="flex items-center justify-between">
+                            <p className="text-sm font-medium text-foreground">Renseignez votre structure</p>
+                            <button
+                              onClick={() => {
+                                setShowManualCompanyForm(false);
+                                setManualCompanyName("");
+                                setManualPostalCode("");
+                                setManualCity("");
+                              }}
+                              className="text-sm text-muted-foreground hover:text-foreground transition-colors"
+                            >
+                              ← Retour à la recherche
+                            </button>
+                          </div>
+                          
+                          <div className="space-y-3">
+                            <div>
+                              <label className="text-sm text-muted-foreground">Nom de la société</label>
+                              <input
+                                type="text"
+                                value={manualCompanyName}
+                                onChange={(e) => setManualCompanyName(e.target.value)}
+                                placeholder="Ex: Ma Société SARL"
+                                className="mt-1 w-full rounded-lg border border-border bg-background px-3 py-2.5 text-sm text-foreground placeholder:text-muted-foreground focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary"
+                              />
+                            </div>
+                            
+                            <div className="grid grid-cols-2 gap-3">
+                              <div className="relative">
+                                <label className="text-sm text-muted-foreground">Code postal</label>
+                                <input
+                                  type="text"
+                                  value={manualPostalCode}
+                                  onChange={(e) => {
+                                    const newPostalCode = e.target.value.replace(/\D/g, "").slice(0, 5);
+                                    setManualPostalCode(newPostalCode);
+                                    setManualCity("");
+                                    setShowManualPostalCodeSuggestions(newPostalCode.length >= 2);
+                                  }}
+                                  onFocus={() => manualPostalCode.length >= 2 && setShowManualPostalCodeSuggestions(true)}
+                                  placeholder="75001"
+                                  className="mt-1 w-full rounded-lg border border-border bg-background px-3 py-2.5 text-sm text-foreground placeholder:text-muted-foreground focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary"
+                                />
+                                
+                                {showManualPostalCodeSuggestions && manualPostalCodeSuggestions.length > 0 && !manualCity && (
+                                  <div className="absolute z-50 mt-1 w-[calc(200%+0.75rem)] rounded-lg border border-border bg-card shadow-lg max-h-48 overflow-y-auto">
+                                    {manualPostalCodeSuggestions.map((item, index) => (
+                                      <button
+                                        key={`manual-${item.postalCode}-${item.city}-${index}`}
+                                        onClick={() => {
+                                          setManualPostalCode(item.postalCode);
+                                          setManualCity(item.city);
+                                          setShowManualPostalCodeSuggestions(false);
+                                        }}
+                                        className={cn(
+                                          "w-full text-left px-3 py-2 hover:bg-muted transition-colors text-sm",
+                                          index !== manualPostalCodeSuggestions.length - 1 && "border-b border-border"
+                                        )}
+                                      >
+                                        <span className="font-medium text-foreground">{item.postalCode}</span>
+                                        <span className="text-muted-foreground"> - {item.city}</span>
+                                      </button>
+                                    ))}
+                                  </div>
+                                )}
+                              </div>
+                              
+                              <div>
+                                <label className="text-sm text-muted-foreground">Ville</label>
+                                <input
+                                  type="text"
+                                  value={manualCity}
+                                  onChange={(e) => setManualCity(e.target.value)}
+                                  placeholder="Paris"
+                                  className="mt-1 w-full rounded-lg border border-border bg-background px-3 py-2.5 text-sm text-foreground placeholder:text-muted-foreground focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary"
+                                />
+                              </div>
+                            </div>
                           </div>
                         </div>
                       )}
@@ -351,7 +490,7 @@ const ProfileTypeStep = ({ onComplete, onBack }: ProfileTypeStepProps) => {
                         )}
                       </div>
                       <div className="flex items-center gap-2">
-                        <Sparkles className="h-4 w-4 text-muted-foreground" />
+                        <Sparkles className="h-5 w-5 text-muted-foreground shrink-0" />
                         <span className="font-medium text-foreground">Société en cours de création</span>
                       </div>
                     </div>
@@ -442,7 +581,7 @@ const ProfileTypeStep = ({ onComplete, onBack }: ProfileTypeStepProps) => {
                         )}
                       </div>
                       <div className="flex items-center gap-2">
-                        <Globe className="h-4 w-4 text-muted-foreground" />
+                        <Globe className="h-5 w-5 text-muted-foreground shrink-0" />
                         <span className="font-medium text-foreground">Professionnel hors de France</span>
                       </div>
                     </div>
@@ -536,7 +675,7 @@ const ProfileTypeStep = ({ onComplete, onBack }: ProfileTypeStepProps) => {
                         )}
                       </div>
                       <div className="flex items-center gap-2">
-                        <User className="h-4 w-4 text-muted-foreground" />
+                        <User className="h-5 w-5 text-muted-foreground shrink-0" />
                         <span className="font-medium text-foreground">Particulier</span>
                       </div>
                     </div>

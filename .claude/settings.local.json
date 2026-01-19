@@ -2,7 +2,16 @@
   "permissions": {
     "allow": [
       "Bash(npm run build:*)",
-      "Bash(dir /b \"C:\\\\Users\\\\USER\\\\Documents\\\\VSCode\\\\lovable-app-nextjs\\\\components\")"
+      "Bash(dir /b \"C:\\\\Users\\\\USER\\\\Documents\\\\VSCode\\\\lovable-app-nextjs\\\\components\")",
+      "Bash(find:*)",
+      "Bash(cat:*)",
+      "Bash(for file in NeedsQuestionnaire.tsx ProfileTypeStep.tsx ProgressHeader.tsx QuestionScreen.tsx SupplierCard.tsx SupplierSelectionModal.tsx)",
+      "Bash(do cat \"src/components/$file\")",
+      "Bash(ls:*)",
+      "Bash(npx tsc:*)",
+      "Bash(grep:*)",
+      "Bash(cd:*)",
+      "Bash(git checkout:*)"
     ]
   }
 }
