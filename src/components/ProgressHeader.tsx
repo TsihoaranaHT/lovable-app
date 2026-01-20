@@ -1,6 +1,7 @@
-import { Check, X } from "lucide-react";
+import { Check, X, Phone } from "lucide-react";
 import { cn } from "@/lib/utils";
 import hpLogo from "@/assets/hp-logo.svg";
+import expertPhoto from "@/assets/expert-patrick.jpg";
 
 interface Step {
   id: number;
@@ -70,11 +71,32 @@ const ProgressHeader = ({ steps, currentStep, progress }: ProgressHeaderProps) =
           ))}
         </div>
 
-        {/* Close button - icon on mobile, text on desktop */}
-        <button className="text-muted-foreground hover:text-foreground transition-colors shrink-0">
-          <X className="h-5 w-5 sm:hidden" />
-          <span className="hidden sm:inline text-sm">Fermer</span>
-        </button>
+        {/* Expert help - desktop */}
+        <a
+          href="tel:+33123456789"
+          className="hidden sm:flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground transition-colors"
+        >
+          <img
+            src={expertPhoto}
+            alt="Patrick Duval"
+            className="h-7 w-7 rounded-full object-cover ring-1 ring-border"
+          />
+          <span className="text-xs">Besoin d'aide ?</span>
+          <span className="font-medium text-foreground">01 23 45 67 89</span>
+        </a>
+
+        {/* Expert help - mobile (icon only) */}
+        <a
+          href="tel:+33123456789"
+          className="sm:hidden flex items-center gap-1.5 text-muted-foreground hover:text-foreground transition-colors"
+        >
+          <img
+            src={expertPhoto}
+            alt="Patrick Duval"
+            className="h-6 w-6 rounded-full object-cover ring-1 ring-border"
+          />
+          <Phone className="h-4 w-4 text-primary" />
+        </a>
       </div>
 
       {/* Progress Bar */}

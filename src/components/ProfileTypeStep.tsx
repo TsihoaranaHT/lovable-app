@@ -137,10 +137,13 @@ const ProfileTypeStep = ({ onComplete, onBack }: ProfileTypeStepProps) => {
   const [countrySearch, setCountrySearch] = useState("");
   const [showPostalCodeSuggestions, setShowPostalCodeSuggestions] = useState(false);
   const [showManualCompanyForm, setShowManualCompanyForm] = useState(false);
+<<<<<<< HEAD
   // For particulier country selection
   const [particulierCountry, setParticulierCountry] = useState("France");
   const [showParticulierCountryDropdown, setShowParticulierCountryDropdown] = useState(false);
   const [particulierCountrySearch, setParticulierCountrySearch] = useState("");
+=======
+>>>>>>> b0e14a692394ef84af5ee2be78a057a9ac971955
   const [manualCompanyName, setManualCompanyName] = useState("");
   const [manualPostalCode, setManualPostalCode] = useState("");
   const [manualCity, setManualCity] = useState("");
@@ -210,7 +213,11 @@ const ProfileTypeStep = ({ onComplete, onBack }: ProfileTypeStepProps) => {
       default:
         return false;
     }
+<<<<<<< HEAD
   }, [selectedType, selectedCompany, postalCode, city, companyName, country, showManualCompanyForm, manualCompanyName, manualPostalCode, manualCity, particulierCountry]);
+=======
+  }, [selectedType, selectedCompany, postalCode, city, companyName, country, showManualCompanyForm, manualCompanyName, manualPostalCode, manualCity]);
+>>>>>>> b0e14a692394ef84af5ee2be78a057a9ac971955
 
   const handleNext = () => {
     if (!isValid) return;

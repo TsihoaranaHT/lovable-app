@@ -1,5 +1,14 @@
-import { ArrowLeft, Send, Shield, Clock } from "lucide-react";
-import { useState } from "react";
+import { ArrowLeft, Send, Shield, Clock, CheckCircle, Paperclip, X } from "lucide-react";
+import { useState, useMemo } from "react";
+import CountryCodeSelect from "./CountryCodeSelect";
+
+// Mock list of existing buyers in database
+const EXISTING_BUYERS = [
+  "jean.dupont@entreprise.fr",
+  "marie.martin@societe.com",
+  "contact@hellopro.fr",
+  "acheteur@garage-martin.fr",
+];
 
 interface Supplier {
   id: string;
@@ -18,10 +27,38 @@ const ContactForm = ({ selectedSuppliers, onBack }: ContactFormProps) => {
     email: "",
     firstName: "",
     lastName: "",
-    company: "",
+    countryCode: "+33",
     phone: "",
     message: "",
   });
+  const [files, setFiles] = useState<File[]>([]);
+
+  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (e.target.files && e.target.files.length > 0) {
+      const newFiles = Array.from(e.target.files);
+      setFiles(prev => [...prev, ...newFiles]);
+      // Reset input to allow adding same file again if needed
+      e.target.value = '';
+    }
+  };
+
+  const removeFile = (index: number) => {
+    setFiles(prev => prev.filter((_, i) => i !== index));
+  };
+
+  // Check if email is from an existing buyer
+  const isExistingBuyer = useMemo(() => {
+    if (!formData.email || formData.email.length < 5) return false;
+    return EXISTING_BUYERS.some(
+      (email) => email.toLowerCase() === formData.email.toLowerCase()
+    );
+  }, [formData.email]);
+
+  // Check if email is valid format
+  const isEmailValid = useMemo(() => {
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    return emailRegex.test(formData.email);
+  }, [formData.email]);
 
   const handleChange = (
     e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
@@ -34,6 +71,9 @@ const ContactForm = ({ selectedSuppliers, onBack }: ContactFormProps) => {
     // Handle form submission
     console.log("Form submitted:", formData);
   };
+
+  // Show additional fields only if email is valid and not an existing buyer
+  const showAdditionalFields = isEmailValid && !isExistingBuyer;
 
   return (
     <div className="p-6 space-y-6">
@@ -63,17 +103,12 @@ const ContactForm = ({ selectedSuppliers, onBack }: ContactFormProps) => {
         </p>
         <div className="flex flex-wrap gap-2">
           {selectedSuppliers.map((supplier) => (
-            <div
+            <span
               key={supplier.id}
-              className="flex items-center gap-2 rounded-full bg-card px-3 py-1.5 text-sm"
+              className="inline-flex items-center rounded-full bg-card border border-border px-3 py-1 text-sm font-medium text-foreground"
             >
-              <img
-                src={supplier.image}
-                alt=""
-                className="h-5 w-5 rounded-full object-cover"
-              />
-              <span className="font-medium">{supplier.supplierName}</span>
-            </div>
+              {supplier.supplierName}
+            </span>
           ))}
         </div>
       </div>
@@ -97,80 +132,12 @@ const ContactForm = ({ selectedSuppliers, onBack }: ContactFormProps) => {
             className="w-full rounded-lg border border-input bg-background px-4 py-3 text-foreground placeholder:text-muted-foreground focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/20 transition-all"
             placeholder="vous@entreprise.com"
           />
-        </div>
-
-        <div className="grid grid-cols-2 gap-4">
-          <div>
-            <label
-              htmlFor="firstName"
-              className="block text-sm font-medium text-foreground mb-1.5"
-            >
-              Prénom *
-            </label>
-            <input
-              type="text"
-              id="firstName"
-              name="firstName"
-              required
-              value={formData.firstName}
-              onChange={handleChange}
-              className="w-full rounded-lg border border-input bg-background px-4 py-3 text-foreground placeholder:text-muted-foreground focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/20 transition-all"
-            />
-          </div>
-          <div>
-            <label
-              htmlFor="lastName"
-              className="block text-sm font-medium text-foreground mb-1.5"
-            >
-              Nom *
-            </label>
-            <input
-              type="text"
-              id="lastName"
-              name="lastName"
-              required
-              value={formData.lastName}
-              onChange={handleChange}
-              className="w-full rounded-lg border border-input bg-background px-4 py-3 text-foreground placeholder:text-muted-foreground focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/20 transition-all"
-            />
-          </div>
-        </div>
-
-        <div>
-          <label
-            htmlFor="company"
-            className="block text-sm font-medium text-foreground mb-1.5"
-          >
-            Société *
-          </label>
-          <input
-            type="text"
-            id="company"
-            name="company"
-            required
-            value={formData.company}
-            onChange={handleChange}
-            className="w-full rounded-lg border border-input bg-background px-4 py-3 text-foreground placeholder:text-muted-foreground focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/20 transition-all"
-          />
-        </div>
-
-        <div>
-          <label
-            htmlFor="phone"
-            className="block text-sm font-medium text-foreground mb-1.5"
-          >
-            Téléphone *
-          </label>
-          <input
-            type="tel"
-            id="phone"
-            name="phone"
-            required
-            value={formData.phone}
-            onChange={handleChange}
-            className="w-full rounded-lg border border-input bg-background px-4 py-3 text-foreground placeholder:text-muted-foreground focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/20 transition-all"
-            placeholder="06 12 34 56 78"
-          />
+          {isExistingBuyer && (
+            <div className="mt-2 flex items-center gap-2 text-sm text-green-600">
+              <CheckCircle className="h-4 w-4" />
+              <span>Nous vous avons reconnu ! Vos informations sont pré-enregistrées.</span>
+            </div>
+          )}
         </div>
 
         <div>
@@ -191,6 +158,122 @@ const ContactForm = ({ selectedSuppliers, onBack }: ContactFormProps) => {
             placeholder="Délais souhaités, contraintes techniques..."
           />
         </div>
+
+        {/* File upload */}
+        <div>
+          <label className="block text-sm font-medium text-foreground mb-1.5">
+            Pièces jointes{" "}
+            <span className="text-muted-foreground">(optionnel)</span>
+          </label>
+          
+          {/* List of added files */}
+          {files.length > 0 && (
+            <div className="mb-2 space-y-2">
+              {files.map((file, index) => (
+                <div
+                  key={index}
+                  className="flex items-center justify-between rounded-lg border border-input bg-secondary/50 px-3 py-2"
+                >
+                  <div className="flex items-center gap-2 min-w-0">
+                    <Paperclip className="h-4 w-4 shrink-0 text-muted-foreground" />
+                    <span className="text-sm text-foreground truncate">{file.name}</span>
+                  </div>
+                  <button
+                    type="button"
+                    onClick={() => removeFile(index)}
+                    className="shrink-0 ml-2 p-1 rounded-full hover:bg-destructive/10 text-muted-foreground hover:text-destructive transition-colors"
+                    aria-label="Supprimer le fichier"
+                  >
+                    <X className="h-4 w-4" />
+                  </button>
+                </div>
+              ))}
+            </div>
+          )}
+
+          {/* Add file button */}
+          <label className="flex cursor-pointer items-center justify-center gap-2 rounded-lg border-2 border-dashed border-input bg-background px-4 py-4 text-muted-foreground hover:border-primary/50 hover:bg-secondary/50 transition-all">
+            <Paperclip className="h-5 w-5" />
+            <span className="text-sm">
+              {files.length > 0
+                ? "Ajouter un autre document"
+                : "Ajouter un document (cahier des charges, photo...)"}
+            </span>
+            <input
+              type="file"
+              className="hidden"
+              onChange={handleFileChange}
+              accept=".pdf,.doc,.docx,.jpg,.jpeg,.png"
+              multiple
+            />
+          </label>
+        </div>
+
+        {showAdditionalFields && (
+          <>
+            <div className="grid grid-cols-2 gap-4">
+              <div>
+                <label
+                  htmlFor="firstName"
+                  className="block text-sm font-medium text-foreground mb-1.5"
+                >
+                  Prénom *
+                </label>
+                <input
+                  type="text"
+                  id="firstName"
+                  name="firstName"
+                  required
+                  value={formData.firstName}
+                  onChange={handleChange}
+                  className="w-full rounded-lg border border-input bg-background px-4 py-3 text-foreground placeholder:text-muted-foreground focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/20 transition-all"
+                />
+              </div>
+              <div>
+                <label
+                  htmlFor="lastName"
+                  className="block text-sm font-medium text-foreground mb-1.5"
+                >
+                  Nom *
+                </label>
+                <input
+                  type="text"
+                  id="lastName"
+                  name="lastName"
+                  required
+                  value={formData.lastName}
+                  onChange={handleChange}
+                  className="w-full rounded-lg border border-input bg-background px-4 py-3 text-foreground placeholder:text-muted-foreground focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/20 transition-all"
+                />
+              </div>
+            </div>
+
+            <div>
+              <label
+                htmlFor="phone"
+                className="block text-sm font-medium text-foreground mb-1.5"
+              >
+                Téléphone *
+              </label>
+              <div className="flex gap-2">
+                <CountryCodeSelect
+                  value={formData.countryCode}
+                  onChange={(value) => setFormData({ ...formData, countryCode: value })}
+                />
+                <input
+                  type="tel"
+                  id="phone"
+                  name="phone"
+                  required
+                  value={formData.phone}
+                  onChange={handleChange}
+                  className="flex-1 rounded-lg border border-input bg-background px-4 py-3 text-foreground placeholder:text-muted-foreground focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/20 transition-all"
+                  placeholder="6 12 34 56 78"
+                />
+              </div>
+            </div>
+          </>
+        )}
 
         {/* Reassurance */}
         <div className="flex flex-col gap-2 rounded-xl bg-secondary/50 p-4">

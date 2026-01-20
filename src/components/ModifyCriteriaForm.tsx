@@ -83,74 +83,71 @@ const ModifyCriteriaForm = ({ onBack }: ModifyCriteriaFormProps) => {
           </p>
         </div>
 
-        {/* Form */}
-        <div className="space-y-5">
-          {/* Two column layout for selects */}
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-            {/* Type de pont - Single select */}
-            <div>
-              <label className="block text-sm font-medium text-foreground mb-1.5">
-                Type de pont
-              </label>
-              <select
-                value={criteria.type}
-                onChange={(e) => setCriteria({ ...criteria, type: e.target.value })}
-                className="w-full rounded-lg border border-input bg-background px-4 py-3 text-foreground focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/20 transition-all"
-              >
-                <option value="2-colonnes">2 colonnes</option>
-                <option value="4-colonnes">4 colonnes</option>
-                <option value="ciseaux">Ciseaux</option>
-                <option value="fosse">Fosse</option>
-              </select>
-            </div>
-
-            {/* Capacité - Multi select */}
-            <div>
-              <label className="block text-sm font-medium text-foreground mb-1.5">
-                Capacité
-              </label>
-              <MultiSelectDropdown
-                options={CAPACITY_OPTIONS}
-                selected={selectedCapacities}
-                onChange={setSelectedCapacities}
-                placeholder="Sélectionner les capacités..."
-                searchPlaceholder="Rechercher une capacité..."
-              />
-            </div>
-
-            {/* Alimentation - Single select */}
-            <div>
-              <label className="block text-sm font-medium text-foreground mb-1.5">
-                Alimentation
-              </label>
-              <select
-                value={criteria.voltage}
-                onChange={(e) =>
-                  setCriteria({ ...criteria, voltage: e.target.value })
-                }
-                className="w-full rounded-lg border border-input bg-background px-4 py-3 text-foreground focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/20 transition-all"
-              >
-                <option value="230v">230V monophasé</option>
-                <option value="400v">400V triphasé</option>
-              </select>
-            </div>
-
-            {/* Zone - Multi select */}
-            <div>
-              <label className="block text-sm font-medium text-foreground mb-1.5">
-                Zone géographique
-              </label>
-              <MultiSelectDropdown
-                options={ZONE_OPTIONS}
-                selected={selectedZones}
-                onChange={setSelectedZones}
-                placeholder="Sélectionner les zones..."
-                searchPlaceholder="Rechercher une zone..."
-              />
-            </div>
+        {/* Form - Single column layout */}
+        <div className="space-y-4">
+          {/* Type de pont */}
+          <div>
+            <label className="block text-sm font-medium text-foreground mb-1.5">
+              Type de pont
+            </label>
+            <select
+              value={criteria.type}
+              onChange={(e) => setCriteria({ ...criteria, type: e.target.value })}
+              className="w-full rounded-lg border border-input bg-background px-4 py-3 text-foreground focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/20 transition-all"
+            >
+              <option value="2-colonnes">2 colonnes</option>
+              <option value="4-colonnes">4 colonnes</option>
+              <option value="ciseaux">Ciseaux</option>
+              <option value="fosse">Fosse</option>
+            </select>
           </div>
 
-          {/* Options - Multi select */}
+          {/* Capacité */}
+          <div>
+            <label className="block text-sm font-medium text-foreground mb-1.5">
+              Capacité
+            </label>
+            <MultiSelectDropdown
+              options={CAPACITY_OPTIONS}
+              selected={selectedCapacities}
+              onChange={setSelectedCapacities}
+              placeholder="Sélectionner les capacités..."
+              searchPlaceholder="Rechercher une capacité..."
+            />
+          </div>
+
+          {/* Alimentation */}
+          <div>
+            <label className="block text-sm font-medium text-foreground mb-1.5">
+              Alimentation
+            </label>
+            <select
+              value={criteria.voltage}
+              onChange={(e) =>
+                setCriteria({ ...criteria, voltage: e.target.value })
+              }
+              className="w-full rounded-lg border border-input bg-background px-4 py-3 text-foreground focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/20 transition-all"
+            >
+              <option value="230v">230V monophasé</option>
+              <option value="400v">400V triphasé</option>
+            </select>
+          </div>
+
+          {/* Zone géographique */}
+          <div>
+            <label className="block text-sm font-medium text-foreground mb-1.5">
+              Zone géographique
+            </label>
+            <MultiSelectDropdown
+              options={ZONE_OPTIONS}
+              selected={selectedZones}
+              onChange={setSelectedZones}
+              placeholder="Sélectionner les zones..."
+              searchPlaceholder="Rechercher une zone..."
+            />
+          </div>
+
+          {/* Options */}
           <div>
             <label className="block text-sm font-medium text-foreground mb-1.5">
               Options
@@ -162,74 +159,6 @@ const ModifyCriteriaForm = ({ onBack }: ModifyCriteriaFormProps) => {
               placeholder="Sélectionner les options..."
               searchPlaceholder="Rechercher une option..."
             />
-          </div>
-
-          {/* Expansion suggestions */}
-          <div className="rounded-xl bg-secondary p-4 space-y-3">
-            <p className="text-sm font-medium text-foreground">
-              Élargir la recherche
-            </p>
-            <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
-              {[
-                {
-                  key: "capacity35t",
-                  label: "Ponts 3,5T",
-                  count: 5,
-                  checked: expansions.capacity35t,
-                },
-                {
-                  key: "allVoltages",
-                  label: "Tous voltages",
-                  count: 3,
-                  checked: expansions.allVoltages,
-                },
-                {
-                  key: "allFrance",
-                  label: "France entière",
-                  count: 12,
-                  checked: expansions.allFrance,
-                },
-              ].map((expansion) => (
-                <label
-                  key={expansion.key}
-                  className="flex items-center gap-3 cursor-pointer group"
-                >
-                  <div
-                    className={`flex h-5 w-5 items-center justify-center rounded border-2 transition-all ${
-                      expansion.checked
-                        ? "border-primary bg-primary"
-                        : "border-muted-foreground/30 group-hover:border-primary/50"
-                    }`}
-                    onClick={() =>
-                      setExpansions({
-                        ...expansions,
-                        [expansion.key]: !expansion.checked,
-                      })
-                    }
-                  >
-                    {expansion.checked && (
-                      <svg
-                        className="h-3 w-3 text-primary-foreground"
-                        fill="none"
-                        viewBox="0 0 24 24"
-                        stroke="currentColor"
-                        strokeWidth={3}
-                      >
-                        <path
-                          strokeLinecap="round"
-                          strokeLinejoin="round"
-                          d="M5 13l4 4L19 7"
-                        />
-                      </svg>
-                    )}
-                  </div>
-                  <span className="text-sm text-foreground">
-                    {expansion.label}{" "}
-                    <span className="text-primary">(+{expansion.count})</span>
-                  </span>
-                </label>
-              ))}
-            </div>
           </div>
 
           {/* Actions */}

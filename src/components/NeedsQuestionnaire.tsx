@@ -1,4 +1,4 @@
-import { useState, useMemo } from "react";
+import { useState } from "react";
 import ProgressHeader from "./ProgressHeader";
 import QuestionScreen from "./QuestionScreen";
 import { QUESTIONS } from "@/data/questions";
@@ -13,9 +13,6 @@ const STEPS = [
   { id: 3, label: "Demande de devis" },
 ];
 
-// Base number of products - decreases as user answers questions
-const BASE_PRODUCT_COUNT = 347;
-
 const NeedsQuestionnaire = ({ onComplete }: NeedsQuestionnaireProps) => {
   const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0);
   const [answers, setAnswers] = useState<Record<number, string[]>>({});
@@ -23,15 +20,6 @@ const NeedsQuestionnaire = ({ onComplete }: NeedsQuestionnaireProps) => {
 
   const currentQuestion = QUESTIONS[currentQuestionIndex];
   const totalQuestions = QUESTIONS.length;
-
-  // Calculate matching products based on answered questions
-  const matchingProductCount = useMemo(() => {
-    const answeredCount = Object.keys(answers).length;
-    // Decrease by ~15-25% per question answered, with some randomness for realism
-    const reductions = [0, 0.18, 0.32, 0.45, 0.56, 0.65, 0.72];
-    const reduction = reductions[Math.min(answeredCount, reductions.length - 1)];
-    return Math.max(12, Math.round(BASE_PRODUCT_COUNT * (1 - reduction)));
-  }, [answers]);
 
   const handleSelectAnswer = (answerId: string, autoAdvance?: boolean) => {
     const currentAnswers = answers[currentQuestion.id] || [];
@@ -111,7 +99,6 @@ const NeedsQuestionnaire = ({ onComplete }: NeedsQuestionnaireProps) => {
           onBack={handleBack}
           isFirst={currentQuestionIndex === 0}
           isLast={currentQuestionIndex === totalQuestions - 1}
-          matchingProductCount={matchingProductCount}
         />
       </div>
     </div>
