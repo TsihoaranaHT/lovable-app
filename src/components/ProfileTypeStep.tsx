@@ -137,13 +137,14 @@ const ProfileTypeStep = ({ onComplete, onBack }: ProfileTypeStepProps) => {
   const [countrySearch, setCountrySearch] = useState("");
   const [showPostalCodeSuggestions, setShowPostalCodeSuggestions] = useState(false);
   const [showManualCompanyForm, setShowManualCompanyForm] = useState(false);
-<<<<<<< HEAD
   // For particulier country selection
   const [particulierCountry, setParticulierCountry] = useState("France");
   const [showParticulierCountryDropdown, setShowParticulierCountryDropdown] = useState(false);
   const [particulierCountrySearch, setParticulierCountrySearch] = useState("");
-=======
->>>>>>> b0e14a692394ef84af5ee2be78a057a9ac971955
+  // For creation country selection
+  const [creationCountry, setCreationCountry] = useState("France");
+  const [showCreationCountryDropdown, setShowCreationCountryDropdown] = useState(false);
+  const [creationCountrySearch, setCreationCountrySearch] = useState("");
   const [manualCompanyName, setManualCompanyName] = useState("");
   const [manualPostalCode, setManualPostalCode] = useState("");
   const [manualCity, setManualCity] = useState("");
@@ -192,6 +193,14 @@ const ProfileTypeStep = ({ onComplete, onBack }: ProfileTypeStepProps) => {
     );
   }, [particulierCountrySearch]);
 
+  // Filter countries based on search for creation
+  const filteredCreationCountries = useMemo(() => {
+    if (!creationCountrySearch.trim()) return COUNTRIES;
+    return COUNTRIES.filter((c) =>
+      c.toLowerCase().includes(creationCountrySearch.toLowerCase())
+    );
+  }, [creationCountrySearch]);
+
   // Check if form is valid
   const isValid = useMemo(() => {
     switch (selectedType) {
@@ -201,7 +210,11 @@ const ProfileTypeStep = ({ onComplete, onBack }: ProfileTypeStepProps) => {
         }
         return selectedCompany !== null;
       case "creation":
-        return postalCode.trim().length >= 5 && city.trim().length > 0;
+        // If France, require postal code and city; otherwise just the country
+        if (creationCountry === "France") {
+          return postalCode.trim().length >= 5 && city.trim().length > 0;
+        }
+        return creationCountry.trim().length > 0;
       case "pro_foreign":
         return companyName.trim().length > 0 && country.trim().length > 0;
       case "particulier":
@@ -213,11 +226,7 @@ const ProfileTypeStep = ({ onComplete, onBack }: ProfileTypeStepProps) => {
       default:
         return false;
     }
-<<<<<<< HEAD
   }, [selectedType, selectedCompany, postalCode, city, companyName, country, showManualCompanyForm, manualCompanyName, manualPostalCode, manualCity, particulierCountry]);
-=======
-  }, [selectedType, selectedCompany, postalCode, city, companyName, country, showManualCompanyForm, manualCompanyName, manualPostalCode, manualCity]);
->>>>>>> b0e14a692394ef84af5ee2be78a057a9ac971955
 
   const handleNext = () => {
     if (!isValid) return;
@@ -235,8 +244,11 @@ const ProfileTypeStep = ({ onComplete, onBack }: ProfileTypeStepProps) => {
         }
         break;
       case "creation":
-        data.postalCode = postalCode;
-        data.city = city;
+        data.country = creationCountry;
+        if (creationCountry === "France") {
+          data.postalCode = postalCode;
+          data.city = city;
+        }
         break;
       case "particulier":
         data.country = particulierCountry;
@@ -528,57 +540,128 @@ const ProfileTypeStep = ({ onComplete, onBack }: ProfileTypeStepProps) => {
                   {selectedType === "creation" && (
                     <div className="mt-4 ml-8 space-y-3">
                       <p className="text-sm text-muted-foreground">Merci de renseigner votre localisation</p>
-                      <div className="grid grid-cols-2 gap-3">
-                        <div className="relative">
-                          <label className="text-sm text-muted-foreground">Code postal</label>
-                          <input
-                            type="text"
-                            value={postalCode}
-                            onChange={(e) => {
-                              const newPostalCode = e.target.value.replace(/\D/g, "").slice(0, 5);
-                              setPostalCode(newPostalCode);
-                              setCity("");
-                              setShowPostalCodeSuggestions(newPostalCode.length >= 2);
-                            }}
-                            onFocus={() => postalCode.length >= 2 && setShowPostalCodeSuggestions(true)}
-                            placeholder="75001"
-                            className="mt-1 w-full rounded-lg border border-border bg-background px-3 py-2.5 text-sm text-foreground placeholder:text-muted-foreground focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary"
-                          />
-                          
-                          {showPostalCodeSuggestions && postalCodeSuggestions.length > 0 && !city && (
-                            <div className="absolute z-50 mt-1 w-[calc(200%+0.75rem)] rounded-lg border border-border bg-card shadow-lg max-h-48 overflow-y-auto">
-                              {postalCodeSuggestions.map((item, index) => (
+                      
+                      {/* Country selection for creation */}
+                      <div className="relative">
+                        <label className="text-sm text-muted-foreground">Pays</label>
+                        <button
+                          type="button"
+                          onClick={() => setShowCreationCountryDropdown(!showCreationCountryDropdown)}
+                          className="mt-1 w-full rounded-lg border border-border bg-background px-3 py-2.5 text-sm text-foreground text-left focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary flex items-center justify-between"
+                        >
+                          <span>{creationCountry || "Sélectionner un pays"}</span>
+                          <Globe className="h-4 w-4 text-muted-foreground" />
+                        </button>
+                        
+                        {showCreationCountryDropdown && (
+                          <div className="absolute z-50 mt-1 w-full rounded-lg border border-border bg-card shadow-lg max-h-64 overflow-hidden">
+                            <div className="p-2 border-b border-border">
+                              <div className="flex items-center gap-2 rounded-lg border border-border bg-background px-3 py-2">
+                                <Search className="h-4 w-4 text-muted-foreground" />
+                                <input
+                                  type="text"
+                                  value={creationCountrySearch}
+                                  onChange={(e) => setCreationCountrySearch(e.target.value)}
+                                  placeholder="Rechercher un pays..."
+                                  className="flex-1 bg-transparent text-sm text-foreground placeholder:text-muted-foreground focus:outline-none"
+                                  autoFocus
+                                />
+                              </div>
+                            </div>
+                            <div className="max-h-48 overflow-y-auto">
+                              {/* France always first */}
+                              <button
+                                onClick={() => {
+                                  setCreationCountry("France");
+                                  setShowCreationCountryDropdown(false);
+                                  setCreationCountrySearch("");
+                                }}
+                                className={cn(
+                                  "w-full text-left px-4 py-2.5 text-sm hover:bg-muted transition-colors border-b border-border",
+                                  creationCountry === "France" && "bg-primary/10 text-primary font-medium"
+                                )}
+                              >
+                                France
+                              </button>
+                              {filteredCreationCountries.filter(c => c !== "France").map((countryItem, index) => (
                                 <button
-                                  key={`${item.postalCode}-${item.city}-${index}`}
+                                  key={countryItem}
                                   onClick={() => {
-                                    setPostalCode(item.postalCode);
-                                    setCity(item.city);
-                                    setShowPostalCodeSuggestions(false);
+                                    setCreationCountry(countryItem);
+                                    setShowCreationCountryDropdown(false);
+                                    setCreationCountrySearch("");
+                                    // Reset postal code and city when country changes
+                                    setPostalCode("");
+                                    setCity("");
                                   }}
                                   className={cn(
                                     "w-full text-left px-4 py-2.5 text-sm hover:bg-muted transition-colors",
-                                    index === 0 && "rounded-t-lg",
-                                    index === postalCodeSuggestions.length - 1 && "rounded-b-lg"
+                                    index !== filteredCreationCountries.filter(c => c !== "France").length - 1 && "border-b border-border",
+                                    creationCountry === countryItem && "bg-primary/10 text-primary font-medium"
                                   )}
                                 >
-                                  <span className="font-medium">{item.postalCode}</span>
-                                  <span className="text-muted-foreground"> — {item.city}</span>
+                                  {countryItem}
                                 </button>
                               ))}
                             </div>
-                          )}
-                        </div>
-                        <div>
-                          <label className="text-sm text-muted-foreground">Ville</label>
-                          <input
-                            type="text"
-                            value={city}
-                            onChange={(e) => setCity(e.target.value)}
-                            placeholder="Ville"
-                            className="mt-1 w-full rounded-lg border border-border bg-background px-3 py-2.5 text-sm text-foreground placeholder:text-muted-foreground focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary"
-                          />
-                        </div>
+                          </div>
+                        )}
                       </div>
+                      
+                      {/* Postal code and city only for France */}
+                      {creationCountry === "France" && (
+                        <div className="grid grid-cols-2 gap-3">
+                          <div className="relative">
+                            <label className="text-sm text-muted-foreground">Code postal</label>
+                            <input
+                              type="text"
+                              value={postalCode}
+                              onChange={(e) => {
+                                const newPostalCode = e.target.value.replace(/\D/g, "").slice(0, 5);
+                                setPostalCode(newPostalCode);
+                                setCity("");
+                                setShowPostalCodeSuggestions(newPostalCode.length >= 2);
+                              }}
+                              onFocus={() => postalCode.length >= 2 && setShowPostalCodeSuggestions(true)}
+                              placeholder="75001"
+                              className="mt-1 w-full rounded-lg border border-border bg-background px-3 py-2.5 text-sm text-foreground placeholder:text-muted-foreground focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary"
+                            />
+                            
+                            {showPostalCodeSuggestions && postalCodeSuggestions.length > 0 && !city && (
+                              <div className="absolute z-50 mt-1 w-[calc(200%+0.75rem)] rounded-lg border border-border bg-card shadow-lg max-h-48 overflow-y-auto">
+                                {postalCodeSuggestions.map((item, index) => (
+                                  <button
+                                    key={`creation-${item.postalCode}-${item.city}-${index}`}
+                                    onClick={() => {
+                                      setPostalCode(item.postalCode);
+                                      setCity(item.city);
+                                      setShowPostalCodeSuggestions(false);
+                                    }}
+                                    className={cn(
+                                      "w-full text-left px-4 py-2.5 text-sm hover:bg-muted transition-colors",
+                                      index === 0 && "rounded-t-lg",
+                                      index === postalCodeSuggestions.length - 1 && "rounded-b-lg"
+                                    )}
+                                  >
+                                    <span className="font-medium">{item.postalCode}</span>
+                                    <span className="text-muted-foreground"> — {item.city}</span>
+                                  </button>
+                                ))}
+                              </div>
+                            )}
+                          </div>
+                          <div>
+                            <label className="text-sm text-muted-foreground">Ville</label>
+                            <input
+                              type="text"
+                              value={city}
+                              onChange={(e) => setCity(e.target.value)}
+                              placeholder="Ville"
+                              className="mt-1 w-full rounded-lg border border-border bg-background px-3 py-2.5 text-sm text-foreground placeholder:text-muted-foreground focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary"
+                            />
+                          </div>
+                        </div>
+                      )}
                     </div>
                   )}
                 </div>

@@ -11,7 +11,8 @@
       "Bash(npx tsc:*)",
       "Bash(grep:*)",
       "Bash(cd:*)",
-      "Bash(git checkout:*)"
+      "Bash(git checkout:*)",
+      "Bash(powershell -Command \"\\(Get-Content package-lock.json\\) -replace ''lovable-app-nextjs'', ''nextjs-app'' | Set-Content package-lock.json\")"
     ]
   }
 }
