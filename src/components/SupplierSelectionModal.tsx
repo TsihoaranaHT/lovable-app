@@ -590,7 +590,15 @@ const SupplierSelectionModal = ({ userAnswers, onBackToQuestionnaire }: Supplier
               </div>
               {/* Criteria Tags */}
               <CriteriaTags
-                criteria={CRITERIA}
+                essentialCriteria={[
+                  { label: "Type", value: "2 colonnes" },
+                  { label: "Capacité", value: "4 tonnes" },
+                  { label: "Alimentation", value: "400V triphasé" },
+                ]}
+                secondaryCriteria={[
+                  { label: "Traverse", value: "Oui" },
+                  { label: "Zone", value: "Île-de-France" },
+                ]}
                 onModify={() => {
                   setViewState("modify-criteria");
                   setCriteriaModified(true);
