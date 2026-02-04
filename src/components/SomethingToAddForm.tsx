@@ -2,6 +2,8 @@ import { ArrowRight, Paperclip, X, Mic, MicOff, ArrowLeft, Send, Shield, Clock, 
 import { useState, useRef, useEffect, useMemo } from "react";
 import ProgressHeader from "./ProgressHeader";
 import CountryCodeSelect from "./CountryCodeSelect";
+import { RadioGroup, RadioGroupItem } from "./ui/radio-group";
+import { Label } from "./ui/label";
 
 // Mock list of existing buyers in database
 const EXISTING_BUYERS = [
@@ -28,6 +30,7 @@ const SomethingToAddForm = ({ onNext, onBack }: SomethingToAddFormProps) => {
   const [isListening, setIsListening] = useState(false);
   const [formData, setFormData] = useState({
     email: "",
+    civility: "",
     firstName: "",
     lastName: "",
     countryCode: "+33",
@@ -326,6 +329,27 @@ const SomethingToAddForm = ({ onNext, onBack }: SomethingToAddFormProps) => {
                   {/* Additional fields - only shown if email is valid and not existing buyer */}
                   {showAdditionalFields && (
                     <>
+                      {/* Civility */}
+                      <div>
+                        <label className="block text-sm font-medium text-foreground mb-2">
+                          Civilité *
+                        </label>
+                        <RadioGroup
+                          value={formData.civility}
+                          onValueChange={(value) => setFormData({ ...formData, civility: value })}
+                          className="flex gap-6"
+                        >
+                          <div className="flex items-center space-x-2">
+                            <RadioGroupItem value="mr" id="civility-mr-staf" />
+                            <Label htmlFor="civility-mr-staf" className="cursor-pointer">Mr</Label>
+                          </div>
+                          <div className="flex items-center space-x-2">
+                            <RadioGroupItem value="mme" id="civility-mme-staf" />
+                            <Label htmlFor="civility-mme-staf" className="cursor-pointer">Mme</Label>
+                          </div>
+                        </RadioGroup>
+                      </div>
+
                       <div className="grid grid-cols-2 gap-4">
                         <div>
                           <label

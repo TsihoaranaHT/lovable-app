@@ -1,7 +1,8 @@
 import { ArrowLeft, Send, Shield, Clock, CheckCircle, Paperclip, X } from "lucide-react";
 import { useState, useMemo } from "react";
 import CountryCodeSelect from "./CountryCodeSelect";
-
+import { RadioGroup, RadioGroupItem } from "./ui/radio-group";
+import { Label } from "./ui/label";
 // Mock list of existing buyers in database
 const EXISTING_BUYERS = [
   "jean.dupont@entreprise.fr",
@@ -25,6 +26,7 @@ interface ContactFormProps {
 const ContactForm = ({ selectedSuppliers, onBack }: ContactFormProps) => {
   const [formData, setFormData] = useState({
     email: "",
+    civility: "",
     firstName: "",
     lastName: "",
     countryCode: "+33",
@@ -211,6 +213,27 @@ const ContactForm = ({ selectedSuppliers, onBack }: ContactFormProps) => {
 
         {showAdditionalFields && (
           <>
+            {/* Civility */}
+            <div>
+              <label className="block text-sm font-medium text-foreground mb-2">
+                Civilité *
+              </label>
+              <RadioGroup
+                value={formData.civility}
+                onValueChange={(value) => setFormData({ ...formData, civility: value })}
+                className="flex gap-6"
+              >
+                <div className="flex items-center space-x-2">
+                  <RadioGroupItem value="mr" id="civility-mr-cf" />
+                  <Label htmlFor="civility-mr-cf" className="cursor-pointer">Mr</Label>
+                </div>
+                <div className="flex items-center space-x-2">
+                  <RadioGroupItem value="mme" id="civility-mme-cf" />
+                  <Label htmlFor="civility-mme-cf" className="cursor-pointer">Mme</Label>
+                </div>
+              </RadioGroup>
+            </div>
+
             <div className="grid grid-cols-2 gap-4">
               <div>
                 <label

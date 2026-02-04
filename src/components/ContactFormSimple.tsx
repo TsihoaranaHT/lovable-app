@@ -2,6 +2,8 @@ import { ArrowLeft, Send, Shield, Clock, CheckCircle } from "lucide-react";
 import { useState, useMemo } from "react";
 import CountryCodeSelect from "./CountryCodeSelect";
 import ProgressHeader from "./ProgressHeader";
+import { RadioGroup, RadioGroupItem } from "./ui/radio-group";
+import { Label } from "./ui/label";
 
 // Mock list of existing buyers in database
 const EXISTING_BUYERS = [
@@ -24,6 +26,7 @@ const STEPS = [
 const ContactFormSimple = ({ onBack }: ContactFormSimpleProps) => {
   const [formData, setFormData] = useState({
     email: "",
+    civility: "",
     firstName: "",
     lastName: "",
     countryCode: "+33",
@@ -127,6 +130,27 @@ const ContactFormSimple = ({ onBack }: ContactFormSimpleProps) => {
               {/* Additional fields - only shown if email is valid and not existing buyer */}
               {showAdditionalFields && (
                 <>
+                  {/* Civility */}
+                  <div>
+                    <label className="block text-sm font-medium text-foreground mb-2">
+                      Civilité *
+                    </label>
+                    <RadioGroup
+                      value={formData.civility}
+                      onValueChange={(value) => setFormData({ ...formData, civility: value })}
+                      className="flex gap-6"
+                    >
+                      <div className="flex items-center space-x-2">
+                        <RadioGroupItem value="mr" id="civility-mr" />
+                        <Label htmlFor="civility-mr" className="cursor-pointer">Mr</Label>
+                      </div>
+                      <div className="flex items-center space-x-2">
+                        <RadioGroupItem value="mme" id="civility-mme" />
+                        <Label htmlFor="civility-mme" className="cursor-pointer">Mme</Label>
+                      </div>
+                    </RadioGroup>
+                  </div>
+
                   <div className="grid grid-cols-2 gap-4">
                     <div>
                       <label
